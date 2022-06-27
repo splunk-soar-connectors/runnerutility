@@ -204,8 +204,6 @@
                 {
                     "data_path": "action_result.status",
                     "data_type": "string",
-                    "column_name": "status",
-                    "column_order": 2
                 },
                 {
                     "data_path": "action_result.message",
