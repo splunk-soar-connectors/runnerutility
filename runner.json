@@ -203,7 +203,7 @@
                 },
                 {
                     "data_path": "action_result.status",
-                    "data_type": "string",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.message",
