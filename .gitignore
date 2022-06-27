@@ -1,0 +1,5 @@
+#ignore all the extra build and check stuff
+*.tgz
+*.ini
+*.pyc
+__pycache__/
