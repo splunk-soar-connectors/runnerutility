@@ -173,7 +173,7 @@
             "action": "clear scheduled playbooks",
             "identifier": "clear_scheduled_playbooks",
             "description": "Remove all pending scheduled playbooks on a container",
-            "verbose": "This action is used to remove all pending scheduled playbooks for a container. This is generally intended to be used to cancel execution if some exit criteria has been reached and any scheduled playbooks need to be suspended permanently",
+            "verbose": "This action is used to remove all pending scheduled playbooks for a container. This is generally intended to be used to cancel execution if some exit criteria has been reached and any scheduled playbooks need to be suspended permanently.",
             "type": "generic",
             "read_only": false,
             "parameters": {
