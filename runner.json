@@ -4,8 +4,8 @@
     "description": "Runner schedules and executes playbooks based on generated schedule artifacts",
     "type": "devops",
     "product_vendor": "Mhike",
-    "logo": "runner.svg",
-    "logo_dark": "runner_dark.svg",
+    "logo": "logo_runner.svg",
+    "logo_dark": "logo_runner_dark.svg",
     "product_name": "Runner",
     "python_version": "3",
     "product_version_regex": ".*",
@@ -15,7 +15,7 @@
     "utctime_updated": "2022-06-14T19:06:53.972034Z",
     "package_name": "phantom_runner",
     "main_module": "runner_connector.py",
-    "min_phantom_version": "4.9.0",
+    "min_phantom_version": "5.2.0",
     "app_wizard_version": "1.0.0",
     "contributors": [
       {
