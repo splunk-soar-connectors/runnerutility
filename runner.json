@@ -15,7 +15,7 @@
     "utctime_updated": "2022-06-14T19:06:53.972034Z",
     "package_name": "phantom_runner",
     "main_module": "runner_connector.py",
-    "min_phantom_version": "5.2.0",
+    "min_phantom_version": "4.9.0",
     "app_wizard_version": "1.0.0",
     "contributors": [
       {
