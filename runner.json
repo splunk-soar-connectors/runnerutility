@@ -19,15 +19,14 @@
     "app_wizard_version": "1.0.0",
     "fips_compliant": false,
     "contributors": [
-      {
-        "name": "Mhike"
-      }
+        {
+            "name": "Mhike"
+        }
     ],
     "configuration": {
         "https_port": {
             "description": "Splunk SOAR HTTPS port if your instance uses one other than 443",
             "data_type": "string",
-            "required": false,
             "order": 0,
             "name": "https_port",
             "id": 0
@@ -44,7 +43,6 @@
         "debug": {
             "description": "Print debugging statements to log",
             "data_type": "boolean",
-            "required": false,
             "default": "False",
             "order": 2,
             "name": "debug",
@@ -121,7 +119,6 @@
                 "artifact_id": {
                     "description": "The ID of the artifact to run the playbook on (requires artifact scope)",
                     "data_type": "numeric",
-                    "required": false,
                     "order": 5,
                     "name": "artifact_id"
                 }
@@ -153,7 +150,11 @@
                 },
                 {
                     "data_path": "action_result.status",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
                 },
                 {
                     "data_path": "action_result.message",
@@ -188,7 +189,6 @@
                 "container_id": {
                     "description": "The ID of the container to cancel schedules for. If an ID is not provided, the current container is assumed",
                     "data_type": "string",
-                    "required": false,
                     "order": 1,
                     "name": "container_id"
                 }
@@ -204,7 +204,11 @@
                 },
                 {
                     "data_path": "action_result.status",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
                 },
                 {
                     "data_path": "action_result.message",
