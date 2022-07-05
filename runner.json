@@ -17,6 +17,7 @@
     "main_module": "runner_connector.py",
     "min_phantom_version": "4.9.0",
     "app_wizard_version": "1.0.0",
+    "fips_compliant": false,
     "contributors": [
       {
         "name": "Mhike"
