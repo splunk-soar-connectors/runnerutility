@@ -205,7 +205,7 @@
             "action": "execute playbook",
             "identifier": "execute_playbook",
             "description": "Execute the configured playbook immediately (Format: <repository>/<playbook>)",
-            "verbose": "This will execute the specified playbook and parameters immediately with no artifacts generated",
+            "verbose": "This will execute the specified playbook and parameters immediately with no artifacts generated.",
             "type": "generic",
             "read_only": false,
             "parameters": {
@@ -356,7 +356,7 @@
             "action": "count runner artifacts",
             "identifier": "count_runner_artifacts",
             "description": "Returns a count of the matching non-pending runner artifacts in the current container",
-            "verbose": "This action is used to determine how many times a specific sheculed playbook has been run in the given container. This is generally used to evaluate escape scenarios when using runner to perform loops and retries",
+            "verbose": "This action is used to determine how many times a specific sheculed playbook has been run in the given container. This is generally used to evaluate escape scenarios when using runner to perform loops and retries.",
             "type": "generic",
             "read_only": true,
             "parameters": {
