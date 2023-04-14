@@ -25,31 +25,33 @@ from phantom.action_result import ActionResult
 class RunnerConnector(phantom.BaseConnector):
 
     is_polling_action = False
+    print_debug = None
 
     def __init__(self):
         super(RunnerConnector, self).__init__()
         return
 
-    def __print(self, value, is_debug):
-        print_debug = False
-        try:
-            print_debug = self.get_config()['debug']
-        except:
-            pass
+    def __print(self, value, is_debug=False):
+        if self.print_debug is None:
+            self.print_debug = False
+            try:
+                self.print_debug = self.get_config()['debug']
+            except Exception as e:
+                self.debug_print("Exception occurred while getting debug key. Exception: {}".format(e))
         message = 'Failed to cast message to string'
         try:
             message = str(value)
-        except:
-            pass
-        if is_debug and not print_debug:
+        except Exception as e:
+            self.debug_print("Exception occurred while converting message into string. Exception: {}".format(e))
+            return
+        if is_debug and not self.print_debug:
             return
         else:
             self.save_progress(message)
-            if self.is_polling_action:
-                self.debug_print(self.__class__.__name__, message)
+            self.debug_print(self.__class__.__name__, message)
 
     def _get_base_url(self):
-        self.__print("_get_base_url()", True)
+        self.__print("_get_base_url()", is_debug=True)
         port = 443
         try:
             port = self.get_config()['https_port']
@@ -60,7 +62,7 @@ class RunnerConnector(phantom.BaseConnector):
     def _get_rest_data(self, endpoint):
         try:
             url = f'{self._get_base_url()}/{endpoint}'
-            self.__print(url, True)
+            self.__print(url, is_debug=True)
             response = phantom.requests.get(url, verify=False)
             content = json.loads(response.text)
             code = response.status_code
@@ -77,7 +79,7 @@ class RunnerConnector(phantom.BaseConnector):
     def _post_rest_data(self, endpoint, dictionary):
         try:
             url = f'{self._get_base_url()}/{endpoint}'
-            self.__print(url, True)
+            self.__print(url, is_debug=True)
             data = json.dumps(dictionary)
             response = phantom.requests.post(url, data=data, verify=False)
             content = response.text
@@ -92,29 +94,36 @@ class RunnerConnector(phantom.BaseConnector):
         except:
             return None
 
-    def _create_artifact(self, comment, unit, duration, playbook, scope):
-        self.__print('_create_artifact()', True)
+    def _create_artifact(self, comment, unit, duration, playbook, scope, container, input_data):
+        self.__print('_create_artifact()', is_debug=True)
+        container_id = container
+        if not container:
+            container_id = self.get_container_id()
         artifact_dict = { "cef": { "comment": comment,
                                 "durationUnit": unit,
                                 "duration": duration,
                                 "playbook": playbook,
                                 "scope": scope },
-                          "container_id": self.get_container_id(),
+                          "container_id": container_id,
                           "label": "pending",
                           "name": "scheduled playbook",
                           "source_data_identifier": f'runner-{datetime.now()}-{self.get_container_id()}',
                           "run_automation": False }
-
-        self.__print(f'Posting artifact: {artifact_dict}', True)
-        uri = "rest/artifact"
-        response = self._post_rest_data(uri, artifact_dict)
-        if response is not None:
-            return True
+        if input_data:
+            artifact_dict["cef"]["inputs"] = input_data
+        if comment and unit:
+            self.__print(f'Posting artifact: {artifact_dict}', is_debug=True)
+            uri = "rest/artifact"
+            response = self._post_rest_data(uri, artifact_dict)
+            if response is not None:
+                return True
+            else:
+                return False
         else:
-            return False
+            return artifact_dict
 
     def _disable_artifact(self, container):
-        self.__print('_disable_artifact()', True)
+        self.__print('_disable_artifact()', is_debug=True)
         uri = f'rest/container/{container}/artifacts?_filter_name=%22scheduled playbook%22&_filter_label=%22pending%22'
         response = self._get_rest_data(uri)
         update_data = {}
@@ -126,10 +135,10 @@ class RunnerConnector(phantom.BaseConnector):
         return
 
     def _add_waiting_tag(self):
-        self.__print('_add_waiting_tag()', True)
+        self.__print('_add_waiting_tag()', is_debug=True)
         uri = f'rest/container/{self.get_container_id()}'
         response = self._get_rest_data(uri)
-        self.__print(response, True)
+        self.__print(response, is_debug=True)
         tags = response['tags']
         if 'waiting' not in tags:
             tags.append('waiting')
@@ -139,7 +148,7 @@ class RunnerConnector(phantom.BaseConnector):
         return
 
     def _delete_waiting_tag(self, container):
-        self.__print('_delete_waiting_tag()', True)
+        self.__print('_delete_waiting_tag()', is_debug=True)
         uri = f'rest/container/{container}'
         response = self._get_rest_data(uri)
         tags = response['tags']
@@ -151,7 +160,7 @@ class RunnerConnector(phantom.BaseConnector):
         return
 
     def _is_playbook_valid(self, artifact, container):
-        self.__print('_is_playbook_valid()', True)
+        self.__print('_is_playbook_valid()', is_debug=True)
         is_valid = False
         playbook = self._playbook_exists(artifact['cef']['playbook'])
         if playbook is not None and playbook != []:
@@ -160,7 +169,7 @@ class RunnerConnector(phantom.BaseConnector):
         return is_valid
 
     def _playbook_exists(self, playbook):
-        self.__print('_playbook_exists()', True)
+        self.__print('_playbook_exists()', is_debug=True)
         playbook_json = None
         if '/' not in playbook:
             return playbook_json
@@ -175,18 +184,18 @@ class RunnerConnector(phantom.BaseConnector):
         return playbook_json
 
     def _get_all_pending_artifacts(self):
-        self.__print('_get_all_pending_artifacts()', True)
+        self.__print('_get_all_pending_artifacts()', is_debug=True)
         try:
             uri = 'rest/artifact?page_size=0&_filter_label="pending"&_filter_name__contains="scheduled playbook"'
             pending_artifacts = self._get_rest_data(uri)
             return pending_artifacts
         except Exception as e:
-            self.__print('Failed to retrieved pending scheduled playbooks', False)
-            self.__print(e, False)
+            self.__print('Failed to retrieved pending scheduled playbooks')
+            self.__print(e)
             return None
 
     def _is_expired(self, artifact):
-        self.__print('_is_expired()', True)
+        self.__print('_is_expired()', is_debug=True)
         is_expired = False
         unit = artifact['cef']['durationUnit']
         duration = artifact['cef']['duration']
@@ -196,35 +205,45 @@ class RunnerConnector(phantom.BaseConnector):
             expiration = datetime.strptime(artifact['create_time'], '%Y-%m-%dT%H:%M:%S.%fZ') + timedelta(hours=int(duration))
         elif unit == 'Days':
             expiration = datetime.strptime(artifact['create_time'], '%Y-%m-%dT%H:%M:%S.%fZ') + timedelta(days=int(duration))
-        self.__print(f'now: {datetime.now()}', True)
-        self.__print(f'expiration: {expiration}', True)
-        self.__print(f'creation: {artifact["create_time"]}', True)
+        self.__print(f'now: {datetime.now()}', is_debug=True)
+        self.__print(f'expiration: {expiration}', is_debug=True)
+        self.__print(f'creation: {artifact["create_time"]}', is_debug=True)
         if expiration <= datetime.now():
             is_expired = True
         return is_expired
 
     def _get_container(self, artifact):
-        self.__print('_get_container()', True)
+        self.__print('_get_container()', is_debug=True)
         uri = f'rest/container/{artifact["container"]}'
         container = self._get_rest_data(uri)
         return container
 
     def _run_playbook(self, artifact):
-        self.__print('_run_playbook()', True)
+        self.__print('_run_playbook()', is_debug=True)
+        self.__print(artifact, is_debug=True)
         success = False
         uri = 'rest/playbook_run'
+        try:
+            container_id = int(artifact['container_id'])
+        except:
+            container_id = int(artifact['container'])
         data = {
-                   "container_id": artifact['container'],
+                   "container_id": container_id,
                    "playbook_id": artifact['cef']['playbook'],
                    "scope": artifact['cef']['scope'],
                    "run": "true"
                }
+        try:
+            data['inputs'] = artifact['cef']['inputs']
+        except:
+            pass
+        self.__print(data, is_debug=True)
         if self._post_rest_data(uri, data) is not None:
             success = True
         return success
 
     def _is_playbook_pending(self, artifact):
-        self.__print('_is_playbook_pending()', True)
+        self.__print('_is_playbook_pending()', is_debug=True)
         is_playbook_pending = False
         uri = f'rest/container/{artifact["container"]}/artifacts?page_size=0&_filter_label="pending"&_filter_name__contains="scheduled playbook"'
         playbooks = self._get_rest_data(uri)
@@ -233,12 +252,12 @@ class RunnerConnector(phantom.BaseConnector):
         return is_playbook_pending
 
     def _delete_tag(self, state, artifact):
-        self.__print('_delete_tag()', True)
+        self.__print('_delete_tag()', is_debug=True)
         uri = f'rest/container/{artifact["container"]}'
         response = self._get_rest_data(uri)
         tags = []
         tags.extend(response['tags'])
-        self.__print(tags, True)
+        self.__print(tags, is_debug=True)
         if state in tags:
             tags.remove(state)
         update_data = {}
@@ -247,7 +266,7 @@ class RunnerConnector(phantom.BaseConnector):
         return
 
     def _update_artifact(self, state, artifact):
-        self.__print('_update_artifact()', True)
+        self.__print('_update_artifact()', is_debug=True)
         update_data = {}
         update_data['cef'] = {}
         update_data['cef'].update(artifact['cef'])
@@ -258,55 +277,147 @@ class RunnerConnector(phantom.BaseConnector):
         return
 
     def _handle_test_connectivity(self, param):
-        self.__print("_handle_test_connectivity", True)
+        self.__print("_handle_test_connectivity", is_debug=True)
         action_result = self.add_action_result(ActionResult(dict(param)))
         test_url = f'{self._get_base_url()}/rest/version'
-        self.__print(f'Attempting http get for {test_url}', False)
+        self.__print(f'Attempting http get for {test_url}')
         response = None
         try:
             response = phantom.requests.get(test_url, verify=False)
-            self.__print(response.status_code, True)
+            self.__print(response.status_code, is_debug=True)
         except:
             pass
         if response and 199 < response.status_code < 300:
             version = json.loads(response.text)['version']
-            self.__print(f'Successfully retrieved platform version: {version}', False)
-            self.__print('Passed connection test', False)
+            self.__print(f'Successfully retrieved platform version: {version}')
+            self.__print('Passed connection test')
             return action_result.set_status(phantom.APP_SUCCESS)
         else:
-            self.__print(f'Failed to reach test url: {test_url}\nCheck your hostname config value', False)
-            self.__print('Failed connection test', False)
+            self.__print(f'Failed to reach test url: {test_url}\nCheck your hostname config value')
+            self.__print('Failed connection test')
             return action_result.set_status(phantom.APP_ERROR, f'Failed to reach test url {test_url}')
 
-    def _handle_schedule_playbook(self, param):
-        self.__print('_handle_schedule_playbook()', True)
+    def _process_input_data(self, param):
+        input_data = None
         try:
-            self.__print('Building standard delayed execution artifact', True)
+            input_data = param.get('input_data')
+            if input_data:
+                try:
+                    input_data = json.loads(input_data)
+                except:
+                    try:
+                        temp = input_data.replace('\'', '"')
+                        temp = json.loads(temp)
+                        input_data = temp
+                    except:
+                        self.__print('Input data was provided but could not be loaded as json. Please check the input data format.')
+                        self.set_status_save_progress(phantom.APP_ERROR, 'Artifact creation failed')
+                        return phantom.APP_ERROR
+        except:
+            pass
+        return input_data
+
+    def _handle_count_runner_artifacts(self, param, action_result):
+        url_params = ['_filter_name="scheduled playbook"',
+                      '_exclude_label="pending"',
+                      'page_size=0']
+        path_values = ['rest',
+                       'container',
+                       str(self.get_container_id()),
+                       'artifacts']
+        try:
+            playbook_filter = param.get('playbook_filter')
+            if playbook_filter:
+                url_params.append(f'_filter_cef__playbook="{playbook_filter}"')
+        except:
+            pass
+        endpoint = f'{"/".join(path_values)}?{"&".join(url_params)}'
+        self.__print(endpoint, is_debug=True)
+        artifact_count = None
+        artifact_count = self._get_rest_data(endpoint)['count']
+        if artifact_count is not None:
+            action_result.add_data({'runner_artifact_count': artifact_count})
+            self.__print(f"Runner artifact count: {artifact_count}", is_debug=True)
+            action_result.set_status(phantom.APP_SUCCESS, 'Successfully completed artifact count')
+            self.set_status_save_progress(phantom.APP_SUCCESS, 'Successfully completed artifact count')
+            return phantom.APP_SUCCESS
+        else:
+            self.__print("Failed to retrieve runner artifact count")
+            action_result.set_status(phantom.APP_ERROR)
+            self.set_status_save_progress(phantom.APP_ERROR, 'Failed to retrieve runner artifact count')
+            return phantom.APP_ERROR
+
+    def _handle_schedule_playbook(self, param):
+        self.__print('_handle_schedule_playbook()', is_debug=True)
+        try:
+            self.__print('Building standard delayed execution artifact', is_debug=True)
             comment = param.get('delay_purpose')
             unit = param.get('duration_unit')
             duration = param.get('delay_duration')
             playbook = param.get('playbook')
             scope = param.get('playbook_scope')
+            container = None
             if scope == "artifact":
                 ids = []
                 ids.append(param.get('artifact_id'))
                 scope = ids
-            if not self._create_artifact(comment, unit, duration, playbook, scope):
+            if "container" in scope:
+                container = param.get('container_id')
+                if "all" in scope:
+                    scope = "all"
+                elif "new" in scope:
+                    scope = "new"
+            input_data = self._process_input_data(param)
+            if input_data == phantom.APP_ERROR:
+                return phantom.APP_ERROR
+            if not self._create_artifact(comment, unit, duration, playbook, scope, container, input_data):
                 self.set_status_save_progress(phantom.APP_ERROR, 'Artifact creation failed')
                 return phantom.APP_ERROR
             self._add_waiting_tag()
             self.set_status_save_progress(phantom.APP_SUCCESS, 'Successfully completed execution delay')
             return phantom.APP_SUCCESS
         except Exception as e:
-            self.__print('_handle_schedule_playbook() failed', False)
-            self.__print(e, False)
+            self.__print('_handle_schedule_playbook() failed')
+            self.__print(e)
+            self.set_status_save_progress(phantom.APP_ERROR, e)
+            return phantom.APP_ERROR
+
+    def _handle_execute_playbook(self, param):
+        self.__print('_handle_execute_playbook()', is_debug=True)
+        try:
+            self.__print('Parsing input fields', is_debug=True)
+            playbook = param.get('playbook')
+            scope = param.get('playbook_scope')
+            container = None
+            if scope == "artifact":
+                ids = []
+                ids.append(param.get('artifact_id'))
+                scope = ids
+            if "container" in scope:
+                container = param.get('container_id')
+                if "all" in scope:
+                    scope = "all"
+                elif "new" in scope:
+                    scope = "new"
+            input_data = self._process_input_data(param)
+            if input_data == phantom.APP_ERROR:
+                return phantom.APP_ERROR
+            execution_data = self._create_artifact(None, None, None, playbook, scope, container, input_data)
+            if not self._run_playbook(execution_data):
+                self.set_status_save_progress(phantom.APP_ERROR, 'Playbook execution failed')
+                return phantom.APP_ERROR
+            self.set_status_save_progress(phantom.APP_SUCCESS, 'Successfully completed execution')
+            return phantom.APP_SUCCESS
+        except Exception as e:
+            self.__print('_handle_execute_playbook() failed')
+            self.__print(e)
             self.set_status_save_progress(phantom.APP_ERROR, e)
             return phantom.APP_ERROR
 
     def _handle_clear_scheduled_playbooks(self, param):
-        self.__print('_handle_clear_scheduled_playbooks()', True)
+        self.__print('_handle_clear_scheduled_playbooks()', is_debug=True)
         try:
-            self.__print('Removing execution parameters', True)
+            self.__print('Removing execution parameters', is_debug=True)
             container_identifier = param.get('container_identifier')
             if container_identifier is None or container_identifier == '':
                 container_identifier = self.get_container_id()
@@ -315,48 +426,48 @@ class RunnerConnector(phantom.BaseConnector):
             self.set_status_save_progress(phantom.APP_SUCCESS, 'Successfully halted execution')
             return phantom.APP_SUCCESS
         except Exception as e:
-            self.__print('_handle_clear_scheduled_playbooks() failed', False)
-            self.__print(e, False)
+            self.__print('_handle_clear_scheduled_playbooks() failed')
+            self.__print(e)
             self.set_status_save_progress(phantom.APP_ERROR, e)
             return phantom.APP_ERROR
 
     def _handle_on_poll(self, param):
-        self.__print('_handle_on_poll()', True)
+        self.__print('_handle_on_poll()', is_debug=True)
         self.is_polling_action = True
         action_result = self.add_action_result(ActionResult(dict(param)))
         try:
-            limit = self.get_config()['playbook_limit']
+            limit = int(self.get_config()['playbook_limit'])
         except:
             limit = 4
         try:
             executions = 0
             for artifact in self._get_all_pending_artifacts():
-                self.__print(f'Processing artifact {artifact["id"]}', True)
+                self.__print(f'Processing artifact {artifact["id"]}', is_debug=True)
                 container = self._get_container(artifact)
                 if self._is_expired(artifact):
-                    self.__print(f'artifact {artifact["id"]} is expired', True)
+                    self.__print(f'artifact {artifact["id"]} is expired', is_debug=True)
                     if self._is_playbook_valid(artifact, container):
-                        self.__print('playbook is valid', True)
+                        self.__print('playbook is valid', is_debug=True)
                         executions += 1
                         self._run_playbook(artifact)
                         self._update_artifact('complete', artifact)
                     else:
-                        self.__print(f'playbook is invalid: {artifact["cef"]["playbook"]}', False)
+                        self.__print(f'playbook is invalid: {artifact["cef"]["playbook"]}')
                         self._update_artifact('invalid playbook', artifact)
                     if self._is_playbook_pending(artifact):
-                        self.__print('playbooks pending', True)
+                        self.__print('playbooks pending', is_debug=True)
                     else:
-                        self.__print('no playbooks pending', True)
+                        self.__print('no playbooks pending', is_debug=True)
                         self._delete_tag('waiting', artifact)
                 else:
-                    self.__print(f'artifact {artifact["id"]} is not expired yet', True)
+                    self.__print(f'artifact {artifact["id"]} is not expired yet', is_debug=True)
                 if executions > limit:
                     break
-            self.__print(f'{executions} playbooks executed', False)
+            self.__print(f'{executions} playbooks executed')
             action_result.set_status(phantom.APP_SUCCESS, f'{executions} playbooks executed')
         except Exception as e:
-            self.__print('Error processing artifacts and playbooks', False)
-            self.__print(e, False)
+            self.__print('Error processing artifacts and playbooks')
+            self.__print(e)
             self.set_status(phantom.APP_ERROR, 'Error processing artifacts and playbooks')
             return phantom.APP_ERROR
 
@@ -364,14 +475,21 @@ class RunnerConnector(phantom.BaseConnector):
         ret_val = phantom.APP_SUCCESS
 
         action_id = self.get_action_identifier()
+        self.__print(f"action_id: {self.get_action_identifier()}")
 
-        self.debug_print("action_id", self.get_action_identifier())
+        action_result = self.add_action_result(ActionResult(dict(param)))
 
         if action_id == 'schedule_playbook':
             ret_val = self._handle_schedule_playbook(param)
 
+        if action_id == 'execute_playbook':
+            ret_val = self._handle_execute_playbook(param)
+
         if action_id == 'clear_scheduled_playbooks':
             ret_val = self._handle_clear_scheduled_playbooks(param)
+
+        if action_id == 'count_runner_artifacts':
+            ret_val = self._handle_count_runner_artifacts(param, action_result)
 
         if action_id == 'on_poll':
             ret_val = self._handle_on_poll(param)
