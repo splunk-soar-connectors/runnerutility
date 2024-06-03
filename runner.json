@@ -1,0 +1,447 @@
+{
+    "appid": "3f141df7-4bf2-40de-8f68-6133a2cabf11",
+    "name": "Runner",
+    "description": "Runner schedules and executes playbooks based on generated schedule artifacts",
+    "type": "devops",
+    "product_vendor": "Mhike",
+    "logo": "logo_runner.svg",
+    "logo_dark": "logo_runner_dark.svg",
+    "product_name": "Runner",
+    "python_version": "3",
+    "product_version_regex": ".*",
+    "publisher": "Mhike",
+    "license": "Copyright (c) Mhike, 2022",
+    "app_version": "1.0.10",
+    "utctime_updated": "2023-04-12T13:41:26.841006Z",
+    "package_name": "phantom_runner",
+    "main_module": "runner_connector.py",
+    "min_phantom_version": "4.9.0",
+    "app_wizard_version": "1.0.0",
+    "fips_compliant": false,
+    "contributors": [
+        {
+            "name": "Mhike"
+        }
+    ],
+    "configuration": {
+        "https_port": {
+            "description": "Splunk SOAR HTTPS port if your instance uses one other than 443",
+            "data_type": "string",
+            "order": 0,
+            "name": "https_port",
+            "id": 0
+        },
+        "playbook_limit": {
+            "description": "How many playbooks should be allowed to run per poll (default: 4)",
+            "data_type": "numeric",
+            "required": true,
+            "default": "4",
+            "order": 1,
+            "name": "playbook_limit",
+            "id": 1
+        },
+        "cluster_base_url": {
+            "description": "The base URL to use in a cluster environment",
+            "data_type": "string",
+            "required": false,
+            "order": 2,
+            "name": "cluster_base_url",
+            "id": 2
+        },
+        "cluster_api_token": {
+            "description": "An API token for a cluster environment",
+            "data_type": "password",
+            "required": false,
+            "order": 3,
+            "name": "playbook_limit",
+            "id": 3
+        },
+        "debug": {
+            "description": "Print debugging statements to log",
+            "data_type": "boolean",
+            "default": "False",
+            "order": 4,
+            "name": "debug",
+            "id": 4
+        }
+    },
+    "actions": [
+        {
+            "action": "test connectivity",
+            "identifier": "test_connectivity",
+            "description": "Validate the asset configuration for connectivity using supplied configuration",
+            "type": "test",
+            "read_only": true,
+            "parameters": {},
+            "output": [],
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "schedule playbook",
+            "identifier": "schedule_playbook",
+            "description": "Create a schedule artifact for a playbook to run later",
+            "verbose": "This will add a specially formatted artifact to the container with the supplied details. This artifact will be created in a pending state. The polling action for this app will look for these pending artifacts and after the schedule time has elapsed, execute the specified playbook.",
+            "type": "generic",
+            "read_only": false,
+            "parameters": {
+                "delay_purpose": {
+                    "description": "A short comment on the purpose of the scheduled execution",
+                    "data_type": "string",
+                    "required": true,
+                    "order": 0,
+                    "name": "delay_purpose"
+                },
+                "duration_unit": {
+                    "description": "Units to be used for the delay duration",
+                    "data_type": "string",
+                    "required": true,
+                    "value_list": [
+                        "Minutes",
+                        "Hours",
+                        "Days"
+                    ],
+                    "default": "Minutes",
+                    "order": 1,
+                    "name": "duration_unit"
+                },
+                "delay_duration": {
+                    "description": "How many units to delay before execution",
+                    "data_type": "numeric",
+                    "required": true,
+                    "default": "5",
+                    "order": 2,
+                    "name": "delay_duration"
+                },
+                "playbook": {
+                    "description": "The playbook to execute after the delay (Format: <repository>/<playbook>)",
+                    "data_type": "string",
+                    "required": true,
+                    "default": "Format: <repository>/<playbook>",
+                    "order": 3,
+                    "name": "playbook"
+                },
+                "playbook_scope": {
+                    "description": "The scope to be applied to the playbook when executing",
+                    "data_type": "string",
+                    "required": true,
+                    "value_list": [
+                        "new",
+                        "all",
+                        "artifact",
+                        "container/all",
+                        "container/new"
+                    ],
+                    "default": "all",
+                    "order": 4,
+                    "name": "playbook_scope"
+                },
+                "artifact_id": {
+                    "description": "The ID of the artifact to run the playbook on (requires artifact scope)",
+                    "data_type": "numeric",
+                    "required": false,
+                    "order": 5,
+                    "name": "artifact_id"
+                },
+                "container_id": {
+                    "description": "The ID of the container to run the playbook on (requires a container scope)",
+                    "data_type": "numeric",
+                    "required": false,
+                    "order": 6,
+                    "name": "container_id"
+                },
+                "input_data": {
+                    "description": "An input dictionary to be used with the playbook (input playbooks only)",
+                    "data_type": "string",
+                    "required": false,
+                    "order": 7,
+                    "name": "input_data"
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.parameter.delay_purpose",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.duration_unit",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.delay_duration",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.parameter.playbook",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.playbook_scope",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.artifact_id",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.parameter.container_id",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.parameter.input_data",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.parameter.container_id",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric"
+                }
+            ],
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "execute playbook",
+            "identifier": "execute_playbook",
+            "description": "Execute the configured playbook immediately (Format: <repository>/<playbook>)",
+            "verbose": "This will execute the specified playbook and parameters immediately with no artifacts generated",
+            "type": "generic",
+            "read_only": false,
+            "parameters": {
+                "playbook": {
+                    "description": "The playbook to execute",
+                    "data_type": "string",
+                    "required": true,
+                    "default": "Format: <repository>/<playbook>",
+                    "order": 0,
+                    "name": "playbook"
+                },
+                "playbook_scope": {
+                    "description": "The scope to be applied to the playbook when executing. Container scopes are for containers other than the current container",
+                    "data_type": "string",
+                    "required": true,
+                    "value_list": [
+                        "new",
+                        "all",
+                        "artifact",
+                        "container/all",
+                        "container/new"
+                    ],
+                    "default": "all",
+                    "order": 1,
+                    "name": "playbook_scope"
+                },
+                "artifact_id": {
+                    "description": "The ID of the artifact to run the playbook on (requires artifact scope)",
+                    "data_type": "numeric",
+                    "required": false,
+                    "order": 2,
+                    "name": "artifact_id"
+                },
+                "container_id": {
+                    "description": "The ID of the container to run the playbook on (requires container scope)",
+                    "data_type": "numeric",
+                    "required": false,
+                    "order": 3,
+                    "name": "container_id"
+                },
+                "input_data": {
+                    "description": "A dictionary of parameters to be used with the target playbook (input playbooks only)",
+                    "data_type": "string",
+                    "required": false,
+                    "order": 4,
+                    "name": "input_data"
+                }
+            },
+            "output": [
+                                {
+                    "data_path": "action_result.parameter.playbook",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.playbook_scope",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.artifact_id",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.parameter.container_id",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.parameter.input_data",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric"
+                }
+            ],
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "clear scheduled playbooks",
+            "identifier": "clear_scheduled_playbooks",
+            "description": "Remove all pending scheduled playbooks on a container",
+            "verbose": "This action is used to remove all pending scheduled playbooks for a container. This is generally intended to be used to cancel execution if some exit criteria has been reached and any scheduled playbooks need to be suspended permanently.",
+            "type": "generic",
+            "read_only": false,
+            "parameters": {
+                "cancellation_reason": {
+                    "description": "A short comment on why the playbooks were cancelled",
+                    "data_type": "string",
+                    "required": true,
+                    "order": 0,
+                    "name": "cancellation_reason"
+                },
+                "container_id": {
+                    "description": "The ID of the container to cancel schedules for. If an ID is not provided, the current container is assumed",
+                    "data_type": "string",
+                    "order": 1,
+                    "name": "container_id"
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.parameter.cancellation_reason",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.container_id",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric"
+                }
+            ],
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "count runner artifacts",
+            "identifier": "count_runner_artifacts",
+            "description": "Returns a count of the matching runner artifacts in the current container",
+            "verbose": "This action is used to determine how many times a specific sheculed playbook has been run in the given container. This is generally used to evaluate escape scenarios when using runner to perform loops and retries",
+            "type": "generic",
+            "read_only": true,
+            "parameters": {
+                "playbook_filter": {
+                    "description": "Optional filter to count only runner artifacts for the given playbook (Format: <repository>/<playbook>)",
+                    "data_type": "string",
+                    "required": false,
+                    "order": 0,
+                    "name": "playbook_filter"
+                },
+                "label_filter": {
+                    "description": "Optional filter to count only runner artifacts with the given label",
+                    "data_type": "string",
+                    "required": false,
+                    "order": 0,
+                    "name": "label_filter"
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.parameter.playbook_filter",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.label_filter",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.runner_artifact_count",
+                    "data_type": "numeric"
+                }
+            ],
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "on poll",
+            "identifier": "on_poll",
+            "description": "Execute scheduled playbooks if their delay period has expired. Smaller intervals will result in more accurate schedules",
+            "type": "generic",
+            "read_only": false,
+            "parameters": {},
+            "output": [],
+            "versions": "EQ(*)"
+        }
+    ],
+    "custom_made": true,
+    "directory": "runner_3f141df7-4bf2-40de-8f68-6133a2cabf11",
+    "version": 1,
+    "appname": "-",
+    "executable": "spawn3",
+    "disabled": false
+}
