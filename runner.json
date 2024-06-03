@@ -387,7 +387,7 @@
                     "description": "Optional filter to count only runner artifacts with the given label",
                     "data_type": "string",
                     "required": false,
-                    "order": 0,
+                    "order": 1,
                     "name": "label_filter"
                 }
             },
