@@ -1,6 +1,6 @@
 # File: runner_connector.py
 #
-# Copyright (c) Mhike, 2022
+# Copyright (c) Mhike, 2024
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ class RunnerConnector(phantom.BaseConnector):
 
     is_polling_action = False
     print_debug = None
+    headers = {}
 
     def __init__(self):
         super(RunnerConnector, self).__init__()
@@ -53,17 +54,33 @@ class RunnerConnector(phantom.BaseConnector):
     def _get_base_url(self):
         self.__print("_get_base_url()", is_debug=True)
         port = 443
+        base_url = 'https://127.0.0.1'
         try:
             port = self.get_config()['https_port']
         except:
             pass
-        return f'https://127.0.0.1:{port}'
+        try:
+            base_url = self.get_config()['cluster_base_url']
+        except:
+            pass
+        return f'{base_url}:{port}'
+
+    def _get_headers(self):
+        self.__print("_get_headers()", is_debug=True)
+        if not self.headers:
+            try:
+                token = self.get_config()['cluster_api_token']
+                self.headers = {"ph-auth-token": token, "runner_auth": "cluster_token"}
+            except:
+                self.headers = {"runner_auth": "phantom.requests"}
+        self.__print(f"Using {self.headers['runner_auth']} for rest authentication", is_debug=True)
+        return self.headers
 
     def _get_rest_data(self, endpoint):
         try:
             url = f'{self._get_base_url()}/{endpoint}'
             self.__print(url, is_debug=True)
-            response = phantom.requests.get(url, verify=False)
+            response = phantom.requests.get(url, headers=self._get_headers(), verify=False)
             content = json.loads(response.text)
             code = response.status_code
             if 199 < code < 300:
@@ -81,7 +98,7 @@ class RunnerConnector(phantom.BaseConnector):
             url = f'{self._get_base_url()}/{endpoint}'
             self.__print(url, is_debug=True)
             data = json.dumps(dictionary)
-            response = phantom.requests.post(url, data=data, verify=False)
+            response = phantom.requests.post(url, data=data, headers=self._get_headers(), verify=False)
             content = response.text
             code = response.status_code
             if 199 < code < 300:
@@ -107,7 +124,7 @@ class RunnerConnector(phantom.BaseConnector):
                           "container_id": container_id,
                           "label": "pending",
                           "name": "scheduled playbook",
-                          "source_data_identifier": f'runner-{datetime.now()}-{self.get_container_id()}',
+                          "source_data_identifier": f'runner-{datetime.utcnow()}-{self.get_container_id()}',
                           "run_automation": False }
         if input_data:
             artifact_dict["cef"]["inputs"] = input_data
@@ -205,10 +222,10 @@ class RunnerConnector(phantom.BaseConnector):
             expiration = datetime.strptime(artifact['create_time'], '%Y-%m-%dT%H:%M:%S.%fZ') + timedelta(hours=int(duration))
         elif unit == 'Days':
             expiration = datetime.strptime(artifact['create_time'], '%Y-%m-%dT%H:%M:%S.%fZ') + timedelta(days=int(duration))
-        self.__print(f'now: {datetime.now()}', is_debug=True)
+        self.__print(f'now: {datetime.utcnow()}', is_debug=True)
         self.__print(f'expiration: {expiration}', is_debug=True)
         self.__print(f'creation: {artifact["create_time"]}', is_debug=True)
-        if expiration <= datetime.now():
+        if expiration <= datetime.utcnow():
             is_expired = True
         return is_expired
 
@@ -270,7 +287,7 @@ class RunnerConnector(phantom.BaseConnector):
         update_data = {}
         update_data['cef'] = {}
         update_data['cef'].update(artifact['cef'])
-        update_data['cef']['exeComment'] = f'Execution run at {datetime.now()}'
+        update_data['cef']['exeComment'] = f'Execution run at {datetime.utcnow()}'
         update_data['label'] = state
         uri = f'rest/artifact/{artifact["id"]}'
         self._post_rest_data(uri, update_data)
@@ -283,7 +300,7 @@ class RunnerConnector(phantom.BaseConnector):
         self.__print(f'Attempting http get for {test_url}')
         response = None
         try:
-            response = phantom.requests.get(test_url, verify=False)
+            response = phantom.requests.get(test_url, headers=self._get_headers(), verify=False)
             self.__print(response.status_code, is_debug=True)
         except:
             pass
@@ -319,7 +336,6 @@ class RunnerConnector(phantom.BaseConnector):
 
     def _handle_count_runner_artifacts(self, param, action_result):
         url_params = ['_filter_name="scheduled playbook"',
-                      '_exclude_label="pending"',
                       'page_size=0']
         path_values = ['rest',
                        'container',
@@ -329,6 +345,12 @@ class RunnerConnector(phantom.BaseConnector):
             playbook_filter = param.get('playbook_filter')
             if playbook_filter:
                 url_params.append(f'_filter_cef__playbook="{playbook_filter}"')
+        except:
+            pass
+        try:
+            label_filter = param.get('label_filter')
+            if label_filter:
+                url_params.append(f'_filter_label="{label_filter}"')
         except:
             pass
         endpoint = f'{"/".join(path_values)}?{"&".join(url_params)}'
