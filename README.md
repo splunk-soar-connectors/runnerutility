@@ -2,7 +2,7 @@
 # Runner
 
 Publisher: Mhike  
-Connector Version: 1.0.6  
+Connector Version: 1.0.10  
 Product Vendor: Mhike  
 Product Name: Runner  
 Product Version Supported (regex): ".\*"  
@@ -33,6 +33,8 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 -------- | -------- | ---- | -----------
 **https_port** |  optional  | string | Splunk SOAR HTTPS port if your instance uses one other than 443
 **playbook_limit** |  required  | numeric | How many playbooks should be allowed to run per poll (default: 4)
+**cluster_base_url** |  optional  | string | The base URL to use in a cluster environment
+**cluster_api_token** |  optional  | password | An API token for a cluster environment
 **debug** |  optional  | boolean | Print debugging statements to log
 
 ### Supported Actions  
@@ -40,7 +42,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 [schedule playbook](#action-schedule-playbook) - Create a schedule artifact for a playbook to run later  
 [execute playbook](#action-execute-playbook) - Execute the configured playbook immediately (Format: <repository>/<playbook>)  
 [clear scheduled playbooks](#action-clear-scheduled-playbooks) - Remove all pending scheduled playbooks on a container  
-[count runner artifacts](#action-count-runner-artifacts) - Returns a count of the matching non-pending runner artifacts in the current container  
+[count runner artifacts](#action-count-runner-artifacts) - Returns a count of the matching runner artifacts in the current container  
 [on poll](#action-on-poll) - Execute scheduled playbooks if their delay period has expired. Smaller intervals will result in more accurate schedules  
 
 ## action: 'test connectivity'
@@ -147,7 +149,7 @@ summary.total_objects | numeric |  |
 summary.total_objects_successful | numeric |  |    
 
 ## action: 'count runner artifacts'
-Returns a count of the matching non-pending runner artifacts in the current container
+Returns a count of the matching runner artifacts in the current container
 
 Type: **generic**  
 Read only: **True**
@@ -158,11 +160,13 @@ This action is used to determine how many times a specific sheculed playbook has
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
 **playbook_filter** |  optional  | Optional filter to count only runner artifacts for the given playbook (Format: <repository>/<playbook>) | string | 
+**label_filter** |  optional  | Optional filter to count only runner artifacts with the given label | string | 
 
 #### Action Output
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
 action_result.parameter.playbook_filter | string |  |  
+action_result.parameter.label_filter | string |  |  
 action_result.status | string |  |   success  failed 
 action_result.message | string |  |  
 summary.total_objects | numeric |  |  

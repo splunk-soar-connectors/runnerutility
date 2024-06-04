@@ -11,7 +11,7 @@
     "product_version_regex": ".*",
     "publisher": "Mhike",
     "license": "Copyright (c) Mhike, 2022",
-    "app_version": "1.0.6",
+    "app_version": "1.0.10",
     "utctime_updated": "2023-04-12T13:41:26.841006Z",
     "package_name": "phantom_runner",
     "main_module": "runner_connector.py",
@@ -40,13 +40,29 @@
             "name": "playbook_limit",
             "id": 1
         },
+        "cluster_base_url": {
+            "description": "The base URL to use in a cluster environment",
+            "data_type": "string",
+            "required": false,
+            "order": 2,
+            "name": "cluster_base_url",
+            "id": 2
+        },
+        "cluster_api_token": {
+            "description": "An API token for a cluster environment",
+            "data_type": "password",
+            "required": false,
+            "order": 3,
+            "name": "playbook_limit",
+            "id": 3
+        },
         "debug": {
             "description": "Print debugging statements to log",
             "data_type": "boolean",
             "default": "False",
-            "order": 2,
+            "order": 4,
             "name": "debug",
-            "id": 2
+            "id": 4
         }
     },
     "actions": [
@@ -355,7 +371,7 @@
         {
             "action": "count runner artifacts",
             "identifier": "count_runner_artifacts",
-            "description": "Returns a count of the matching non-pending runner artifacts in the current container",
+            "description": "Returns a count of the matching runner artifacts in the current container",
             "verbose": "This action is used to determine how many times a specific sheculed playbook has been run in the given container. This is generally used to evaluate escape scenarios when using runner to perform loops and retries.",
             "type": "generic",
             "read_only": true,
@@ -366,11 +382,22 @@
                     "required": false,
                     "order": 0,
                     "name": "playbook_filter"
+                },
+                "label_filter": {
+                    "description": "Optional filter to count only runner artifacts with the given label",
+                    "data_type": "string",
+                    "required": false,
+                    "order": 1,
+                    "name": "label_filter"
                 }
             },
             "output": [
                 {
                     "data_path": "action_result.parameter.playbook_filter",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.label_filter",
                     "data_type": "string"
                 },
                 {
