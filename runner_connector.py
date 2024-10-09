@@ -138,7 +138,7 @@ class RunnerConnector(phantom.BaseConnector):
                          "label": "pending",
                          "name": "scheduled playbook",
                          "source_data_identifier": f"runner-{datetime.utcnow()}-{self.get_container_id()}",
-                         "run_automation": False } # nosemgrep
+                         "run_automation": False }  # nosemgrep
         if input_data:
             artifact_dict["cef"]["inputs"] = input_data
         if comment and unit:
@@ -266,7 +266,7 @@ class RunnerConnector(phantom.BaseConnector):
         data = {"container_id": container_id,
                 "playbook_id": artifact["cef"]["playbook"],
                 "scope": artifact["cef"]["scope"],
-                "run": "true"} # nosemgrep
+                "run": "true"}  # nosemgrep
         try:
             data["inputs"] = artifact["cef"]["inputs"]
         except:
