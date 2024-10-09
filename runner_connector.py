@@ -15,9 +15,9 @@
 #
 #
 
+import inspect
 import json
 from datetime import datetime, timedelta
-import inspect
 
 import phantom.app as phantom
 import requests
