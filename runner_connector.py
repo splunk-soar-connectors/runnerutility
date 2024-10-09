@@ -129,16 +129,14 @@ class RunnerConnector(phantom.BaseConnector):
         container_id = container
         if not container:
             container_id = self.get_container_id()
-        artifact_dict = {"cef": {"comment": comment,
-                                 "durationUnit": unit,
-                                 "duration": duration,
-                                 "playbook": playbook,
-                                 "scope": scope },
-                         "container_id": container_id,
-                         "label": "pending",
-                         "name": "scheduled playbook",
-                         "source_data_identifier": f"runner-{datetime.utcnow()}-{self.get_container_id()}",
-                         "run_automation": False }  # nosemgrep
+        artifact_dict = {
+            "cef": {"comment": comment, "durationUnit": unit, "duration": duration, "playbook": playbook, "scope": scope },
+            "container_id": container_id,
+            "label": "pending",
+            "name": "scheduled playbook",
+            "source_data_identifier": f"runner-{datetime.utcnow()}-{self.get_container_id()}",
+            "run_automation": False
+        }
         if input_data:
             artifact_dict["cef"]["inputs"] = input_data
         if comment and unit:
@@ -263,10 +261,12 @@ class RunnerConnector(phantom.BaseConnector):
             container_id = int(artifact["container_id"])
         except:
             container_id = int(artifact["container"])
-        data = {"container_id": container_id,
-                "playbook_id": artifact["cef"]["playbook"],
-                "scope": artifact["cef"]["scope"],
-                "run": "true"}  # nosemgrep
+        data = {
+            "container_id": container_id,
+            "playbook_id": artifact["cef"]["playbook"],
+            "scope": artifact["cef"]["scope"],
+            "run": "true"
+        }
         try:
             data["inputs"] = artifact["cef"]["inputs"]
         except:
