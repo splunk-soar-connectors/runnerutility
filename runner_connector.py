@@ -17,6 +17,7 @@
 
 import json
 from datetime import datetime, timedelta
+import requests
 
 import phantom.app as phantom
 from phantom.action_result import ActionResult
@@ -27,6 +28,7 @@ class RunnerConnector(phantom.BaseConnector):
     is_polling_action = False
     print_debug = None
     headers = {}
+    session = None
 
     def __init__(self):
         super(RunnerConnector, self).__init__()
@@ -65,22 +67,14 @@ class RunnerConnector(phantom.BaseConnector):
             pass
         return f'{base_url}:{port}'
 
-    def _get_headers(self):
-        self.__print("_get_headers()", is_debug=True)
-        if not self.headers:
-            try:
-                token = self.get_config()['cluster_api_token']
-                self.headers = {"ph-auth-token": token, "runner_auth": "cluster_token"}
-            except:
-                self.headers = {"runner_auth": "phantom.requests"}
-        self.__print(f"Using {self.headers['runner_auth']} for rest authentication", is_debug=True)
-        return self.headers
-
     def _get_rest_data(self, endpoint):
         try:
             url = f'{self._get_base_url()}/{endpoint}'
             self.__print(url, is_debug=True)
-            response = phantom.requests.get(url, headers=self._get_headers(), verify=False)
+            if self.session:
+                response = self.session.get(url, verify=False)
+            else:
+                response = phantom.requests.get(url, verify=False)
             content = json.loads(response.text)
             code = response.status_code
             if 199 < code < 300:
@@ -98,7 +92,10 @@ class RunnerConnector(phantom.BaseConnector):
             url = f'{self._get_base_url()}/{endpoint}'
             self.__print(url, is_debug=True)
             data = json.dumps(dictionary)
-            response = phantom.requests.post(url, data=data, headers=self._get_headers(), verify=False)
+            if self.session:
+                response = self.session.post(url, data=data, verify=False)
+            else:
+                response = phantom.requests.post(url, data=data, verify=False)
             content = response.text
             code = response.status_code
             if 199 < code < 300:
@@ -139,16 +136,17 @@ class RunnerConnector(phantom.BaseConnector):
         else:
             return artifact_dict
 
-    def _disable_artifact(self, container):
+    def _disable_artifact(self, container, reason):
         self.__print('_disable_artifact()', is_debug=True)
         uri = f'rest/container/{container}/artifacts?_filter_name=%22scheduled playbook%22&_filter_label=%22pending%22'
         response = self._get_rest_data(uri)
-        update_data = {}
-        update_data['label'] = 'halted'
+        update_data = {'label': 'halted'}
         for artifact in response['data']:
+            update_data['cef'] = artifact['cef']
+            update_data['cef']['exeComment'] = reason
             update_data['id'] = artifact['id']
             uri = f'rest/artifact/{artifact["id"]}'
-            response = self._post_rest_data(uri)
+            response = self._post_rest_data(uri, update_data)
         return
 
     def _add_waiting_tag(self):
@@ -255,9 +253,10 @@ class RunnerConnector(phantom.BaseConnector):
         except:
             pass
         self.__print(data, is_debug=True)
-        if self._post_rest_data(uri, data) is not None:
+        result = self._post_rest_data(uri, data)
+        if result is not None:
             success = True
-        return success
+        return success, result
 
     def _is_playbook_pending(self, artifact):
         self.__print('_is_playbook_pending()', is_debug=True)
@@ -282,12 +281,14 @@ class RunnerConnector(phantom.BaseConnector):
         response = self._post_rest_data(uri, update_data)
         return
 
-    def _update_artifact(self, state, artifact):
+    def _update_artifact(self, state, artifact, result=None):
         self.__print('_update_artifact()', is_debug=True)
         update_data = {}
         update_data['cef'] = {}
         update_data['cef'].update(artifact['cef'])
         update_data['cef']['exeComment'] = f'Execution run at {datetime.utcnow()}'
+        if result:
+            update_data['cef']['rest_response'] = result
         update_data['label'] = state
         uri = f'rest/artifact/{artifact["id"]}'
         self._post_rest_data(uri, update_data)
@@ -300,7 +301,10 @@ class RunnerConnector(phantom.BaseConnector):
         self.__print(f'Attempting http get for {test_url}')
         response = None
         try:
-            response = phantom.requests.get(test_url, headers=self._get_headers(), verify=False)
+            if self.session:
+                response = self.session.get(test_url, verify=False)
+            else:
+                response = phantom.requests.get(test_url, verify=False)
             self.__print(response.status_code, is_debug=True)
         except:
             pass
@@ -440,11 +444,12 @@ class RunnerConnector(phantom.BaseConnector):
         self.__print('_handle_clear_scheduled_playbooks()', is_debug=True)
         try:
             self.__print('Removing execution parameters', is_debug=True)
-            container_identifier = param.get('container_identifier')
+            reason = param.get('cancellation_reason')
+            container_identifier = param.get('container_id')
             if container_identifier is None or container_identifier == '':
                 container_identifier = self.get_container_id()
             self._delete_waiting_tag(container_identifier)
-            self._disable_artifact(container_identifier)
+            self._disable_artifact(container_identifier, reason)
             self.set_status_save_progress(phantom.APP_SUCCESS, 'Successfully halted execution')
             return phantom.APP_SUCCESS
         except Exception as e:
@@ -471,8 +476,8 @@ class RunnerConnector(phantom.BaseConnector):
                     if self._is_playbook_valid(artifact, container):
                         self.__print('playbook is valid', is_debug=True)
                         executions += 1
-                        self._run_playbook(artifact)
-                        self._update_artifact('complete', artifact)
+                        result = self._run_playbook(artifact)
+                        self._update_artifact('complete', artifact, result=result)
                     else:
                         self.__print(f'playbook is invalid: {artifact["cef"]["playbook"]}')
                         self._update_artifact('invalid playbook', artifact)
@@ -492,6 +497,24 @@ class RunnerConnector(phantom.BaseConnector):
             self.__print(e)
             self.set_status(phantom.APP_ERROR, 'Error processing artifacts and playbooks')
             return phantom.APP_ERROR
+
+    def initialize(self):
+        config = self.get_config()
+        try:
+            self.print_debug = config['print_debug']
+        except Exception as e:
+            self.__print(f'Exception occurred while getting debug key. Exception: {e}')
+            self.print_debug = False
+        try:
+            token = config['cluster_api_token']
+            self.headers = {"ph-auth-token": token}
+        except:
+            self.__print('No api token provided. Using phantom.requests')
+            self.headers = {}
+        if self.headers:
+            self.session = requests.Session()
+            self.session.headers = self.headers
+        return phantom.APP_SUCCESS
 
     def handle_action(self, param):
         ret_val = phantom.APP_SUCCESS
