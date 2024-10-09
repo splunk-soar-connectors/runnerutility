@@ -130,7 +130,7 @@ class RunnerConnector(phantom.BaseConnector):
         if not container:
             container_id = self.get_container_id()
         artifact_dict = {
-            "cef": {"comment": comment, "durationUnit": unit, "duration": duration, "playbook": playbook, "scope": scope },
+            "cef": {"comment": comment, "durationUnit": unit, "duration": duration, "playbook": playbook, "scope": scope},
             "container_id": container_id,
             "label": "pending",
             "name": "scheduled playbook",
