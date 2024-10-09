@@ -17,9 +17,9 @@
 
 import json
 from datetime import datetime, timedelta
-import requests
 
 import phantom.app as phantom
+import requests
 from phantom.action_result import ActionResult
 
 
