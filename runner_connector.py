@@ -39,7 +39,7 @@ class RunnerConnector(phantom.BaseConnector):
         if self.print_debug is None:
             self.print_debug = False
             try:
-                self.print_debug = self.get_config()["debug"]
+                self.print_debug = self.get_config().get("debug")
             except Exception as e:
                 self.debug_print("Exception occurred while getting debug key. Exception: {}".format(e))
         message = "Failed to cast message to string"
@@ -60,11 +60,11 @@ class RunnerConnector(phantom.BaseConnector):
         port = 443
         base_url = "https://127.0.0.1"
         try:
-            port = self.get_config()["https_port"]
+            port = self.get_config().get("https_port")
         except:
             pass
         try:
-            base_url = self.get_config()["cluster_base_url"]
+            base_url = self.get_config().get("cluster_base_url")
         except:
             pass
         self.__print(f"Base URL: {base_url}:{port}", True)
@@ -488,7 +488,7 @@ class RunnerConnector(phantom.BaseConnector):
         self.is_polling_action = True
         action_result = self.add_action_result(ActionResult(dict(param)))
         try:
-            limit = int(self.get_config()["playbook_limit"])
+            limit = int(self.get_config().get("playbook_limit"))
             self.__print(f"Execution limit set to {limit}")
         except:
             limit = 4
@@ -528,13 +528,13 @@ class RunnerConnector(phantom.BaseConnector):
     def initialize(self):
         config = self.get_config()
         try:
-            self.print_debug = config["debug"]
+            self.print_debug = config.get("debug")
         except Exception as e:
             self.__print(f"Exception occurred while getting debug key. Exception: {e}")
             self.__print("Defaulting to debug = False")
             self.print_debug = False
         try:
-            token = config["cluster_api_token"]
+            token = config.get("cluster_api_token")
             self.headers = {"ph-auth-token": token}
             self.__print("API token provided. Using token authed session")
         except:
