@@ -129,16 +129,16 @@ class RunnerConnector(phantom.BaseConnector):
         container_id = container
         if not container:
             container_id = self.get_container_id()
-        artifact_dict = { "cef": { "comment": comment,
-                                "durationUnit": unit,
-                                "duration": duration,
-                                "playbook": playbook,
-                                "scope": scope },
-                          "container_id": container_id,
-                          "label": "pending",
-                          "name": "scheduled playbook",
-                          "source_data_identifier": f"runner-{datetime.utcnow()}-{self.get_container_id()}",
-                          "run_automation": False }
+        artifact_dict = {"cef": {"comment": comment,
+                                 "durationUnit": unit,
+                                 "duration": duration,
+                                 "playbook": playbook,
+                                 "scope": scope },
+                         "container_id": container_id,
+                         "label": "pending",
+                         "name": "scheduled playbook",
+                         "source_data_identifier": f"runner-{datetime.utcnow()}-{self.get_container_id()}",
+                         "run_automation": False } # nosemgrep
         if input_data:
             artifact_dict["cef"]["inputs"] = input_data
         if comment and unit:
@@ -263,12 +263,10 @@ class RunnerConnector(phantom.BaseConnector):
             container_id = int(artifact["container_id"])
         except:
             container_id = int(artifact["container"])
-        data = {
-                   "container_id": container_id,
-                   "playbook_id": artifact["cef"]["playbook"],
-                   "scope": artifact["cef"]["scope"],
-                   "run": "true"
-               }
+        data = {"container_id": container_id,
+                "playbook_id": artifact["cef"]["playbook"],
+                "scope": artifact["cef"]["scope"],
+                "run": "true"} # nosemgrep
         try:
             data["inputs"] = artifact["cef"]["inputs"]
         except:
@@ -364,12 +362,8 @@ class RunnerConnector(phantom.BaseConnector):
 
     def _handle_count_runner_artifacts(self, param, action_result):
         self.__print("Start", True)
-        url_params = ['_filter_name="scheduled playbook"',
-                      "page_size=0"]
-        path_values = ["rest",
-                       "container",
-                       str(self.get_container_id()),
-                       "artifacts"]
+        url_params = ['_filter_name="scheduled playbook"', "page_size=0"]
+        path_values = ["rest", "container", str(self.get_container_id()), "artifacts"]
         try:
             playbook_filter = param.get("playbook_filter")
             if playbook_filter:
