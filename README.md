@@ -2,7 +2,7 @@
 # Runner
 
 Publisher: Mhike  
-Connector Version: 1.0.10  
+Connector Version: 1.0.17  
 Product Vendor: Mhike  
 Product Name: Runner  
 Product Version Supported (regex): ".\*"  
@@ -130,7 +130,7 @@ Remove all pending scheduled playbooks on a container
 Type: **generic**  
 Read only: **False**
 
-This action is used to remove all pending scheduled playbooks for a container. This is generally intended to be used to cancel execution if some exit criteria has been reached and any scheduled playbooks need to be suspended permanently.
+This action is used to remove all pending schedule playbooks for a container. This is generally intended to be used to cancel execution if some exit criteria has been reached and any scheduled playbooks need to be suspended permanently.
 
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
