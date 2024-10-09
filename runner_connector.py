@@ -135,7 +135,7 @@ class RunnerConnector(phantom.BaseConnector):
             "label": "pending",
             "name": "scheduled playbook",
             "source_data_identifier": f"runner-{datetime.utcnow()}-{self.get_container_id()}",
-            "run_automation": False
+            "run_automation": False,
         }
         if input_data:
             artifact_dict["cef"]["inputs"] = input_data
@@ -261,12 +261,7 @@ class RunnerConnector(phantom.BaseConnector):
             container_id = int(artifact["container_id"])
         except:
             container_id = int(artifact["container"])
-        data = {
-            "container_id": container_id,
-            "playbook_id": artifact["cef"]["playbook"],
-            "scope": artifact["cef"]["scope"],
-            "run": "true"
-        }
+        data = {"container_id": container_id, "playbook_id": artifact["cef"]["playbook"], "scope": artifact["cef"]["scope"], "run": "true"}
         try:
             data["inputs"] = artifact["cef"]["inputs"]
         except:
