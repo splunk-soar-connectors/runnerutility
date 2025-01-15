@@ -11,8 +11,8 @@
     "product_version_regex": ".*",
     "publisher": "Mhike",
     "license": "Copyright (c) Mhike, 2022",
-    "app_version": "1.0.17",
-    "utctime_updated": "2024-09-30T00:00:00.000000Z",
+    "app_version": "1.0.18",
+    "utctime_updated": "2025-01-15T00:55:49.000000Z",
     "package_name": "phantom_runner",
     "main_module": "runner_connector.py",
     "min_phantom_version": "4.9.0",
@@ -271,7 +271,7 @@
                 }
             },
             "output": [
-                                {
+                {
                     "data_path": "action_result.parameter.playbook",
                     "data_type": "string"
                 },
