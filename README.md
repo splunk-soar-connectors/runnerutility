@@ -2,7 +2,7 @@
 # Runner
 
 Publisher: Mhike  
-Connector Version: 1.0.17  
+Connector Version: 1.0.18  
 Product Vendor: Mhike  
 Product Name: Runner  
 Product Version Supported (regex): ".\*"  
@@ -26,8 +26,8 @@ Runner schedules and executes playbooks based on generated schedule artifacts
 
 
 
-### Configuration Variables
-The below configuration variables are required for this Connector to operate.  These variables are specified when configuring a Runner asset in SOAR.
+### Configuration variables
+This table lists the configuration variables required to operate Runner. These variables are specified when configuring a Runner asset in Splunk SOAR.
 
 VARIABLE | REQUIRED | TYPE | DESCRIPTION
 -------- | -------- | ---- | -----------
