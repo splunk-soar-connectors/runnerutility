@@ -10,7 +10,7 @@
     "python_version": "3",
     "product_version_regex": ".*",
     "publisher": "Mhike",
-    "license": "Copyright (c) Mhike, 2022",
+    "license": "Copyright (c) Mhike, 2022-2025",
     "app_version": "1.0.18",
     "utctime_updated": "2025-01-15T00:55:49.000000Z",
     "package_name": "phantom_runner",
