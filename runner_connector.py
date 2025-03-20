@@ -1,6 +1,6 @@
 # File: runner_connector.py
 #
-# Copyright (c) Mhike, 2022
+# Copyright (c) Mhike, 2022-2025
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,14 +25,13 @@ from phantom.action_result import ActionResult
 
 
 class RunnerConnector(phantom.BaseConnector):
-
     is_polling_action = False
     print_debug = None
     headers = {}
     session = None
 
     def __init__(self):
-        super(RunnerConnector, self).__init__()
+        super().__init__()
         return
 
     def __print(self, value, is_debug=False):
@@ -41,13 +40,13 @@ class RunnerConnector(phantom.BaseConnector):
             try:
                 self.print_debug = self.get_config().get("debug")
             except Exception as e:
-                self.debug_print("Exception occurred while getting debug key. Exception: {}".format(e))
+                self.debug_print(f"Exception occurred while getting debug key. Exception: {e}")
         message = "Failed to cast message to string"
         source = f"logging: {inspect.stack()[1].function}()"
         try:
             message = str(value)
         except Exception as e:
-            self.debug_print("Exception occurred while converting message into string. Exception: {}".format(e))
+            self.debug_print(f"Exception occurred while converting message into string. Exception: {e}")
             return
         if is_debug and not self.print_debug:
             return
@@ -160,7 +159,7 @@ class RunnerConnector(phantom.BaseConnector):
             update_data["cef"] = artifact["cef"]
             update_data["cef"]["exeComment"] = reason
             update_data["id"] = artifact["id"]
-            uri = f'rest/artifact/{artifact["id"]}'
+            uri = f"rest/artifact/{artifact['id']}"
             response = self._post_rest_data(uri, update_data)
         return
 
@@ -240,15 +239,15 @@ class RunnerConnector(phantom.BaseConnector):
             expiration = datetime.strptime(artifact["create_time"], "%Y-%m-%dT%H:%M:%S.%fZ") + timedelta(days=int(duration))
         self.__print(f"Current time: {datetime.utcnow()}", True)
         self.__print(f"Expiration time: {expiration}", True)
-        self.__print(f'Creation time: {artifact["create_time"]}', True)
+        self.__print(f"Creation time: {artifact['create_time']}", True)
         if expiration <= datetime.utcnow():
             is_expired = True
-            self.__print(f'Artifact {artifact["id"]} wait time has expired')
+            self.__print(f"Artifact {artifact['id']} wait time has expired")
         return is_expired
 
     def _get_container(self, artifact):
         self.__print("Start", True)
-        uri = f'rest/container/{artifact["container"]}'
+        uri = f"rest/container/{artifact['container']}"
         container = self._get_rest_data(uri)
         return container
 
@@ -283,7 +282,7 @@ class RunnerConnector(phantom.BaseConnector):
 
     def _delete_tag(self, state, artifact):
         self.__print("Start", True)
-        uri = f'rest/container/{artifact["container"]}'
+        uri = f"rest/container/{artifact['container']}"
         response = self._get_rest_data(uri)
         tags = []
         tags.extend(response["tags"])
@@ -304,7 +303,7 @@ class RunnerConnector(phantom.BaseConnector):
         if result:
             update_data["cef"]["rest_response"] = result
         update_data["label"] = state
-        uri = f'rest/artifact/{artifact["id"]}'
+        uri = f"rest/artifact/{artifact['id']}"
         self.__print(f"Updating artifact with {update_data}", True)
         self._post_rest_data(uri, update_data)
         return
@@ -371,7 +370,7 @@ class RunnerConnector(phantom.BaseConnector):
                 url_params.append(f'_filter_label="{label_filter}"')
         except:
             pass
-        endpoint = f'{"/".join(path_values)}?{"&".join(url_params)}'
+        endpoint = f"{'/'.join(path_values)}?{'&'.join(url_params)}"
         self.__print(endpoint, is_debug=True)
         artifact_count = None
         artifact_count = self._get_rest_data(endpoint)["count"]
@@ -485,17 +484,17 @@ class RunnerConnector(phantom.BaseConnector):
         try:
             executions = 0
             for artifact in self._get_all_pending_artifacts():
-                self.__print(f'Processing runner artifact: {artifact["id"]}', True)
+                self.__print(f"Processing runner artifact: {artifact['id']}", True)
                 container = self._get_container(artifact)
                 if self._is_expired(artifact):
-                    self.__print(f'Artifact {artifact["id"]} is expired', True)
+                    self.__print(f"Artifact {artifact['id']} is expired", True)
                     if self._is_playbook_valid(artifact, container):
                         self.__print("Playbook is valid", True)
                         executions += 1
                         result = self._run_playbook(artifact)
                         self._update_artifact("complete", artifact, result=result)
                     else:
-                        self.__print(f'playbook is invalid: {artifact["cef"]["playbook"]}')
+                        self.__print(f"playbook is invalid: {artifact['cef']['playbook']}")
                         self._update_artifact("invalid playbook", artifact)
                     if self._is_playbook_pending(artifact):
                         self.__print("playbooks pending", True)
@@ -503,7 +502,7 @@ class RunnerConnector(phantom.BaseConnector):
                         self.__print("no playbooks pending", True)
                         self._delete_tag("waiting", artifact)
                 else:
-                    self.__print(f'artifact {artifact["id"]} is not expired yet', True)
+                    self.__print(f"artifact {artifact['id']} is not expired yet", True)
                 if executions > limit:
                     break
             self.__print(f"{executions} playbooks executed")
