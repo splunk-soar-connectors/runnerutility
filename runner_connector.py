@@ -56,12 +56,14 @@ class RunnerConnector(phantom.BaseConnector):
 
     def _get_base_url(self):
         self.__print("Start", True)
-        try:
-            base_url = self.get_config().get("cluster_base_url")
+        base_url = self.get_config().get("cluster_base_url")
+        if base_url:
             port = self.get_config().get("https_port")
+            if not port:
+                port = 443
             self.__print(f"Base URL: {base_url}:{port}", True)
             return f"{base_url}:{port}"
-        except:
+        else:
             return self.get_phantom_base_url()
 
     def _get_rest_data(self, endpoint):
