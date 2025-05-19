@@ -437,11 +437,5 @@
             "output": [],
             "versions": "EQ(*)"
         }
-    ],
-    "custom_made": true,
-    "directory": "runner_3f141df7-4bf2-40de-8f68-6133a2cabf11",
-    "version": 1,
-    "appname": "-",
-    "executable": "spawn3",
-    "disabled": false
+    ]
 }
