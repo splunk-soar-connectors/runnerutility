@@ -1,7 +1,7 @@
 # Runner
 
 Publisher: Mhike \
-Connector Version: 1.0.11 \
+Connector Version: 1.1.0 \
 Product Vendor: Mhike \
 Product Name: Runner \
 Minimum Product Version: 4.9.0
