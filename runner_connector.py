@@ -323,7 +323,7 @@ class RunnerConnector(phantom.BaseConnector):
             version = json.loads(response.text)["version"]
             self.__print(f"Successfully retrieved platform version: {version}")
             self.__print("Passed connection test")
-            return action_result.set_status(phantom.APP_SUCCESS)
+            return action_result.set_status(phantom.APP_SUCCESS, "Passed connection test")
         else:
             self.__print(f"Failed to reach test url: {test_url}\nCheck your hostname config value")
             self.__print("Failed connection test")
@@ -374,14 +374,10 @@ class RunnerConnector(phantom.BaseConnector):
         if artifact_count is not None:
             action_result.add_data({"runner_artifact_count": artifact_count})
             self.__print(f"Runner artifact count: {artifact_count}", True)
-            action_result.set_status(phantom.APP_SUCCESS, "Successfully completed artifact count")
-            self.set_status(phantom.APP_SUCCESS, "Successfully completed artifact count")
-            return phantom.APP_SUCCESS
+            return action_result.set_status(phantom.APP_SUCCESS, "Successfully completed artifact count")
         else:
             self.__print("Failed to retrieve runner artifact count")
-            action_result.set_status(phantom.APP_ERROR)
-            self.set_status(phantom.APP_ERROR, "Failed to retrieve runner artifact count")
-            return phantom.APP_ERROR
+            return action_result.set_status(phantom.APP_ERROR, "Failed to retrieve runner artifact count")
 
     def _handle_schedule_playbook(self, param, action_result):
         self.__print("Start", True)
@@ -407,16 +403,13 @@ class RunnerConnector(phantom.BaseConnector):
             if input_data == phantom.APP_ERROR:
                 return phantom.APP_ERROR
             if not self._create_artifact(comment, unit, duration, playbook, scope, container, input_data):
-                self.set_status(phantom.APP_ERROR, "Artifact creation failed")
-                return phantom.APP_ERROR
+                return action_result.set_status(phantom.APP_ERROR, "Artifact creation failed")
             self._add_waiting_tag()
-            self.set_status(phantom.APP_SUCCESS, "Successfully completed execution delay")
-            return phantom.APP_SUCCESS
+            return action_result.set_status(phantom.APP_SUCCESS, "Successfully completed execution delay")
         except Exception as e:
             self.__print("Action failed with exception")
             self.__print(e)
-            self.set_status(phantom.APP_ERROR, e)
-            return phantom.APP_ERROR
+            return action_result.set_status(phantom.APP_ERROR, e)
 
     def _handle_execute_playbook(self, param, action_result):
         self.__print("Start", True)
@@ -440,15 +433,12 @@ class RunnerConnector(phantom.BaseConnector):
                 return phantom.APP_ERROR
             execution_data = self._create_artifact(None, None, None, playbook, scope, container, input_data)
             if not self._run_playbook(execution_data):
-                self.set_status(phantom.APP_ERROR, "Playbook execution failed")
-                return phantom.APP_ERROR
-            self.set_status(phantom.APP_SUCCESS, "Successfully completed execution")
-            return phantom.APP_SUCCESS
+                return action_result.set_status(phantom.APP_ERROR, "Playbook execution failed")
+            return action_result.set_status(phantom.APP_SUCCESS, "Successfully completed execution")
         except Exception as e:
             self.__print("Action failed with exception")
             self.__print(e)
-            self.set_status(phantom.APP_ERROR, e)
-            return phantom.APP_ERROR
+            return action_result.set_status(phantom.APP_ERROR, e)
 
     def _handle_clear_scheduled_playbooks(self, param, action_result):
         self.__print("Start", True)
@@ -460,13 +450,11 @@ class RunnerConnector(phantom.BaseConnector):
                 container_identifier = self.get_container_id()
             self._delete_waiting_tag(container_identifier)
             self._disable_artifact(container_identifier, reason)
-            self.set_status(phantom.APP_SUCCESS, "Successfully halted execution")
-            return phantom.APP_SUCCESS
+            return action_result.set_status(phantom.APP_SUCCESS, "Successfully halted execution")
         except Exception as e:
             self.__print("Action failed with exception")
             self.__print(e)
-            self.set_status(phantom.APP_ERROR, e)
-            return phantom.APP_ERROR
+            return action_result.set_status(phantom.APP_ERROR, f"Exception: {e}")
 
     def _handle_on_poll(self, param, action_result):
         self.__print("Start", True)
@@ -502,12 +490,11 @@ class RunnerConnector(phantom.BaseConnector):
                 if executions > limit:
                     break
             self.__print(f"{executions} playbooks executed")
-            action_result.set_status(phantom.APP_SUCCESS, f"{executions} playbooks executed")
+            return action_result.set_status(phantom.APP_SUCCESS, f"{executions} playbooks executed")
         except Exception as e:
             self.__print("Error processing artifacts and playbooks")
             self.__print(e)
-            self.set_status(phantom.APP_ERROR, "Error processing artifacts and playbooks")
-            return phantom.APP_ERROR
+            return self.set_status(phantom.APP_ERROR, "Error processing artifacts and playbooks")
 
     def initialize(self):
         config = self.get_config()
