@@ -12,7 +12,7 @@
     "publisher": "Mhike",
     "license": "Copyright (c) Mhike, 2022-2025",
     "app_version": "1.1.1",
-    "utctime_updated": "2025-06-26T00:00:00.000000Z",
+    "utctime_updated": "2025-08-06T22:51:25.699924Z",
     "package_name": "phantom_runner",
     "main_module": "runner_connector.py",
     "min_phantom_version": "4.9.0",
