@@ -1,9 +1,9 @@
 # Runner
 
-Publisher: Mhike \
-Connector Version: 1.1.1 \
-Product Vendor: Mhike \
-Product Name: Runner \
+Publisher: Mhike <br>
+Connector Version: 1.1.1 <br>
+Product Vendor: Mhike <br>
+Product Name: Runner <br>
 Minimum Product Version: 4.9.0
 
 Runner schedules and executes playbooks based on generated schedule artifacts
@@ -22,18 +22,18 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 
 ### Supported Actions
 
-[test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity using supplied configuration \
-[schedule playbook](#action-schedule-playbook) - Create a schedule artifact for a playbook to run later \
-[execute playbook](#action-execute-playbook) - Execute the configured playbook immediately (Format: <repository>/<playbook>) \
-[clear scheduled playbooks](#action-clear-scheduled-playbooks) - Remove all pending scheduled playbooks on a container \
-[count runner artifacts](#action-count-runner-artifacts) - Returns a count of the matching runner artifacts in the current container \
+[test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity using supplied configuration <br>
+[schedule playbook](#action-schedule-playbook) - Create a schedule artifact for a playbook to run later <br>
+[execute playbook](#action-execute-playbook) - Execute the configured playbook immediately (Format: <repository>/<playbook>) <br>
+[clear scheduled playbooks](#action-clear-scheduled-playbooks) - Remove all pending scheduled playbooks on a container <br>
+[count runner artifacts](#action-count-runner-artifacts) - Returns a count of the matching runner artifacts in the current container <br>
 [on poll](#action-on-poll) - Execute scheduled playbooks if their delay period has expired. Smaller intervals will result in more accurate schedules
 
 ## action: 'test connectivity'
 
 Validate the asset configuration for connectivity using supplied configuration
 
-Type: **test** \
+Type: **test** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -48,7 +48,7 @@ No Output
 
 Create a schedule artifact for a playbook to run later
 
-Type: **generic** \
+Type: **generic** <br>
 Read only: **False**
 
 This will add a specially formatted artifact to the container with the supplied details. This artifact will be created in a pending state. The polling action for this app will look for these pending artifacts and after the schedule time has elapsed, execute the specified playbook.
@@ -88,7 +88,7 @@ summary.total_objects_successful | numeric | | |
 
 Execute the configured playbook immediately (Format: <repository>/<playbook>)
 
-Type: **generic** \
+Type: **generic** <br>
 Read only: **False**
 
 This will execute the specified playbook and parameters immediately with no artifacts generated.
@@ -121,7 +121,7 @@ summary.total_objects_successful | numeric | | |
 
 Remove all pending scheduled playbooks on a container
 
-Type: **generic** \
+Type: **generic** <br>
 Read only: **False**
 
 This action is used to remove all pending schedule playbooks for a container. This is generally intended to be used to cancel execution if some exit criteria has been reached and any scheduled playbooks need to be suspended permanently.
@@ -148,7 +148,7 @@ summary.total_objects_successful | numeric | | |
 
 Returns a count of the matching runner artifacts in the current container
 
-Type: **generic** \
+Type: **generic** <br>
 Read only: **True**
 
 This action is used to determine how many times a specific sheculed playbook has been run in the given container. This is generally used to evaluate escape scenarios when using runner to perform loops and retries.
@@ -176,7 +176,7 @@ action_result.data.\*.runner_artifact_count | numeric | | |
 
 Execute scheduled playbooks if their delay period has expired. Smaller intervals will result in more accurate schedules
 
-Type: **generic** \
+Type: **generic** <br>
 Read only: **False**
 
 #### Action Parameters
