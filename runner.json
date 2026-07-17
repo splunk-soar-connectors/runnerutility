@@ -63,6 +63,14 @@
             "order": 4,
             "name": "debug",
             "id": 4
+        },
+        "verify_server_cert": {
+            "description": "Verify the server certificate for HTTPS connections",
+            "data_type": "boolean",
+            "default": true,
+            "order": 5,
+            "name": "verify_server_cert",
+            "id": 5
         }
     },
     "actions": [
@@ -437,5 +445,11 @@
             "output": [],
             "versions": "EQ(*)"
         }
-    ]
+    ],
+    "pip39_dependencies": {
+        "wheel": []
+    },
+    "pip313_dependencies": {
+        "wheel": []
+    }
 }

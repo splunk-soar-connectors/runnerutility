@@ -1,3 +1,3 @@
 **Unreleased**
 
-* chore: refresh connector development tooling (Written by Codex)
+* PAPP-38039: Verify server certificates by default for Runner API requests (Written by Codex)

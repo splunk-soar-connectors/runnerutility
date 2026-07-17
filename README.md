@@ -19,6 +19,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **cluster_base_url** | optional | string | The base URL to use in a cluster environment |
 **cluster_api_token** | optional | password | An API token for a cluster environment |
 **debug** | optional | boolean | Print debugging statements to log |
+**verify_server_cert** | optional | boolean | Verify the server certificate for HTTPS connections |
 
 ### Supported Actions
 
