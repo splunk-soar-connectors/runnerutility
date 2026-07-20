@@ -10,7 +10,7 @@
     "python_version": "3",
     "product_version_regex": ".*",
     "publisher": "Mhike",
-    "license": "Copyright (c) Mhike, 2022-2025",
+    "license": "Copyright (c) Mhike, 2022-2026",
     "app_version": "1.1.1",
     "utctime_updated": "2025-08-06T22:51:25.699924Z",
     "package_name": "phantom_runner",
@@ -63,6 +63,14 @@
             "order": 4,
             "name": "debug",
             "id": 4
+        },
+        "verify_server_cert": {
+            "description": "Verify the server certificate for HTTPS connections",
+            "data_type": "boolean",
+            "default": true,
+            "order": 5,
+            "name": "verify_server_cert",
+            "id": 5
         }
     },
     "actions": [
@@ -437,5 +445,11 @@
             "output": [],
             "versions": "EQ(*)"
         }
-    ]
+    ],
+    "pip39_dependencies": {
+        "wheel": []
+    },
+    "pip313_dependencies": {
+        "wheel": []
+    }
 }

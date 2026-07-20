@@ -1,6 +1,6 @@
 # File: runner_connector.py
 #
-# Copyright (c) Mhike, 2022-2025
+# Copyright (c) Mhike, 2022-2026
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ class RunnerConnector(phantom.BaseConnector):
 
     def __init__(self):
         super().__init__()
+        self._verify_server_cert = True
         return
 
     def __print(self, value, is_debug=False):
@@ -73,9 +74,9 @@ class RunnerConnector(phantom.BaseConnector):
             url = f"{self._get_base_url()}/{endpoint}"
             self.__print(url, True)
             if self.session:
-                response = self.session.get(url, verify=False)
+                response = self.session.get(url, verify=self._verify_server_cert)
             else:
-                response = phantom.requests.get(url, verify=False)
+                response = phantom.requests.get(url, verify=self._verify_server_cert)
             content = json.loads(response.text)
             code = response.status_code
             if 199 < code < 300:
@@ -100,9 +101,9 @@ class RunnerConnector(phantom.BaseConnector):
             self.__print(url, True)
             data = json.dumps(dictionary)
             if self.session:
-                response = self.session.post(url, data=data, verify=False)
+                response = self.session.post(url, data=data, verify=self._verify_server_cert)
             else:
-                response = phantom.requests.post(url, data=data, verify=False)
+                response = phantom.requests.post(url, data=data, verify=self._verify_server_cert)
             content = response.text
             code = response.status_code
             if 199 < code < 300:
@@ -313,9 +314,9 @@ class RunnerConnector(phantom.BaseConnector):
         response = None
         try:
             if self.session:
-                response = self.session.get(test_url, verify=False)
+                response = self.session.get(test_url, verify=self._verify_server_cert)
             else:
-                response = phantom.requests.get(test_url, verify=False)
+                response = phantom.requests.get(test_url, verify=self._verify_server_cert)
             self.__print(response.status_code, True)
         except:
             pass
@@ -498,6 +499,7 @@ class RunnerConnector(phantom.BaseConnector):
 
     def initialize(self):
         config = self.get_config()
+        self._verify_server_cert = config.get("verify_server_cert", True)
         try:
             self.print_debug = config.get("debug")
         except Exception as e:

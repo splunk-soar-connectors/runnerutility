@@ -19,6 +19,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **cluster_base_url** | optional | string | The base URL to use in a cluster environment |
 **cluster_api_token** | optional | password | An API token for a cluster environment |
 **debug** | optional | boolean | Print debugging statements to log |
+**verify_server_cert** | optional | boolean | Verify the server certificate for HTTPS connections |
 
 ### Supported Actions
 
@@ -191,7 +192,7 @@ ______________________________________________________________________
 
 Auto-generated Splunk SOAR Connector documentation.
 
-Copyright 2025 Splunk Inc.
+Copyright 2026 Splunk Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
