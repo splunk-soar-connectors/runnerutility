@@ -1,10 +1,10 @@
 # Runner
 
 Publisher: Mhike <br>
-Connector Version: 1.1.2 <br>
+Connector Version: 1.2.0 <br>
 Product Vendor: Mhike <br>
 Product Name: Runner <br>
-Minimum Product Version: 4.9.0
+Minimum Product Version: 6.3.0
 
 Runner schedules and executes playbooks based on generated schedule artifacts
 
@@ -66,6 +66,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **artifact_id** | optional | The ID of the artifact to run the playbook on (requires artifact scope) | numeric | |
 **container_id** | optional | The ID of the container to run the playbook on (requires a container scope) | numeric | |
 **input_data** | optional | An input dictionary to be used with the playbook (input playbooks only) | string | |
+**high_priority** | optional | Cut the line (Only high priority/time sensitive schedules) | boolean | |
 
 #### Action Output
 
@@ -79,6 +80,7 @@ action_result.parameter.playbook_scope | string | | |
 action_result.parameter.artifact_id | numeric | | |
 action_result.parameter.container_id | numeric | | |
 action_result.parameter.input_data | string | | |
+action_result.parameter.high_priority | boolean | | |
 action_result.status | string | | success failed |
 action_result.message | string | | |
 summary.total_objects | numeric | | |
