@@ -7,11 +7,11 @@
     "logo": "logo_runner.svg",
     "logo_dark": "logo_runner_dark.svg",
     "product_name": "Runner",
-    "python_version": "3",
+    "python_version": "3.13",
     "product_version_regex": ".*",
     "publisher": "Mhike",
     "license": "Copyright (c) Mhike, 2022-2026",
-    "app_version": "1.1.2",
+    "app_version": "1.2.0",
     "utctime_updated": "2026-07-20T17:53:21.332893Z",
     "package_name": "phantom_runner",
     "main_module": "runner_connector.py",
@@ -163,6 +163,13 @@
                     "required": false,
                     "order": 7,
                     "name": "input_data"
+                },
+                "high_priority": {
+                    "description": "Cut the line (Only high priority/time sensitive schedules)",
+                    "data_type": "boolean",
+                    "required": false,
+                    "order": 8,
+                    "name": "high_priority"
                 }
             },
             "output": [
@@ -197,6 +204,10 @@
                 {
                     "data_path": "action_result.parameter.input_data",
                     "data_type": "string"
+                },
+		{
+                    "data_path": "action_result.parameter.high_priority",
+                    "data_type": "boolean"
                 },
                 {
                     "data_path": "action_result.status",
@@ -326,7 +337,7 @@
             "action": "clear scheduled playbooks",
             "identifier": "clear_scheduled_playbooks",
             "description": "Remove all pending scheduled playbooks on a container",
-            "verbose": "This action is used to remove all pending schedule playbooks for a container. This is generally intended to be used to cancel execution if some exit criteria has been reached and any scheduled playbooks need to be suspended permanently.",
+            "verbose": "This action is used to remove all pending scheduled playbooks for a container. This is generally intended to be used to cancel execution if some exit criteria has been reached and any scheduled playbooks need to be suspended permanently.",
             "type": "generic",
             "read_only": false,
             "parameters": {
@@ -380,7 +391,7 @@
             "action": "count runner artifacts",
             "identifier": "count_runner_artifacts",
             "description": "Returns a count of the matching runner artifacts in the current container",
-            "verbose": "This action is used to determine how many times a specific sheculed playbook has been run in the given container. This is generally used to evaluate escape scenarios when using runner to perform loops and retries.",
+            "verbose": "This action is used to determine how many times a specific scheduled playbook has been run in the given container. This is generally used to evaluate escape scenarios when using runner to perform loops and retries.",
             "type": "generic",
             "read_only": true,
             "parameters": {
@@ -395,7 +406,7 @@
                     "description": "Optional filter to count only runner artifacts with the given label",
                     "data_type": "string",
                     "required": false,
-                    "order": 1,
+                    "order": 0,
                     "name": "label_filter"
                 }
             },
