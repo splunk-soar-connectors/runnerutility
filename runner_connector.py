@@ -221,10 +221,10 @@ class RunnerConnector(phantom.BaseConnector):
         try:
             uri = 'rest/artifact?page_size=0&_filter_label="pending"&_filter_name__contains="scheduled playbook"'
             if priority:
-                uri = f'{uri}&_filter_cef__high_priority__isnull=False'
+                uri = f"{uri}&_filter_cef__high_priority__isnull=False"
             else:
-                uri = f'{uri}&_filter_cef__high_priority__isnull=True'
-            uri = f'{uri}&sort=id&order=asc'
+                uri = f"{uri}&_filter_cef__high_priority__isnull=True"
+            uri = f"{uri}&sort=id&order=asc"
             pending_artifacts = self._get_rest_data(uri)
             return pending_artifacts
         except Exception as e:
