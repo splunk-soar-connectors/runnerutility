@@ -122,7 +122,7 @@ class RunnerConnector(phantom.BaseConnector):
             self.__print(f"POST payload: {dictionary}")
             return None
 
-    def _create_artifact(self, comment, unit, duration, playbook, scope, container, input_data):
+    def _create_artifact(self, comment, unit, duration, playbook, scope, container, input_data, priority=False):
         self.__print("Start", True)
         container_id = container
         if not container:
@@ -135,6 +135,8 @@ class RunnerConnector(phantom.BaseConnector):
             "source_data_identifier": f"runner-{datetime.utcnow()}-{self.get_container_id()}",
             "run_automation": False,
         }
+        if priority:
+            artifact_dict["cef"]["high_priority"] = True
         if input_data:
             artifact_dict["cef"]["inputs"] = input_data
         if comment and unit:
@@ -214,10 +216,15 @@ class RunnerConnector(phantom.BaseConnector):
             playbook_json = self._get_rest_data(uri)
         return playbook_json
 
-    def _get_all_pending_artifacts(self):
+    def _get_all_pending_artifacts(self, priority=False):
         self.__print("Start", True)
         try:
-            uri = 'rest/artifact?page_size=0&_filter_label="pending"&_filter_name__contains="scheduled playbook"&sort=id&order=asc'
+            uri = 'rest/artifact?page_size=0&_filter_label="pending"&_filter_name__contains="scheduled playbook"'
+            if priority:
+                uri = f'{uri}&_filter_cef__high_priority__isnull=False'
+            else:
+                uri = f'{uri}&_filter_cef__high_priority__isnull=True'
+            uri = f'{uri}&sort=id&order=asc'
             pending_artifacts = self._get_rest_data(uri)
             return pending_artifacts
         except Exception as e:
@@ -401,9 +408,10 @@ class RunnerConnector(phantom.BaseConnector):
                 elif "new" in scope:
                     scope = "new"
             input_data = self._process_input_data(param)
+            priority = param.get("high_priority")
             if input_data == phantom.APP_ERROR:
                 return phantom.APP_ERROR
-            if not self._create_artifact(comment, unit, duration, playbook, scope, container, input_data):
+            if not self._create_artifact(comment, unit, duration, playbook, scope, container, input_data, priority):
                 return action_result.set_status(phantom.APP_ERROR, "Artifact creation failed")
             self._add_waiting_tag()
             return action_result.set_status(phantom.APP_SUCCESS, "Successfully completed execution delay")
@@ -457,6 +465,28 @@ class RunnerConnector(phantom.BaseConnector):
             self.__print(e)
             return action_result.set_status(phantom.APP_ERROR, f"Exception: {e}")
 
+    def _handle_polling_execution(self, artifact):
+        self.__print(f"Processing runner artifact: {artifact['id']}", True)
+        container = self._get_container(artifact)
+        if self._is_expired(artifact):
+            self.__print(f"Artifact {artifact['id']} is expired", True)
+            if self._is_playbook_valid(artifact, container):
+                self.__print("Playbook is valid", True)
+                result = self._run_playbook(artifact)
+                self._update_artifact("complete", artifact, result=result)
+                return True
+            else:
+                self.__print(f"playbook is invalid: {artifact['cef']['playbook']}")
+                self._update_artifact("invalid playbook", artifact)
+            if self._is_playbook_pending(artifact):
+                self.__print("playbooks pending", True)
+            else:
+                self.__print("no playbooks pending", True)
+                self._delete_tag("waiting", artifact)
+        else:
+            self.__print(f"artifact {artifact['id']} is not expired yet", True)
+        return False
+
     def _handle_on_poll(self, param, action_result):
         self.__print("Start", True)
         self.is_polling_action = True
@@ -467,28 +497,16 @@ class RunnerConnector(phantom.BaseConnector):
             limit = 4
             self.__print("Failed to retrieve execution limit from config. Defaulting to 4")
         try:
+            for artifact in self._get_all_pending_artifacts(priority=True):
+                self.__print("----- High priority schedule -----")
+                playbook_executed = self._handle_polling_execution(artifact)
             executions = 0
             for artifact in self._get_all_pending_artifacts():
-                self.__print(f"Processing runner artifact: {artifact['id']}", True)
-                container = self._get_container(artifact)
-                if self._is_expired(artifact):
-                    self.__print(f"Artifact {artifact['id']} is expired", True)
-                    if self._is_playbook_valid(artifact, container):
-                        self.__print("Playbook is valid", True)
-                        executions += 1
-                        result = self._run_playbook(artifact)
-                        self._update_artifact("complete", artifact, result=result)
-                    else:
-                        self.__print(f"playbook is invalid: {artifact['cef']['playbook']}")
-                        self._update_artifact("invalid playbook", artifact)
-                    if self._is_playbook_pending(artifact):
-                        self.__print("playbooks pending", True)
-                    else:
-                        self.__print("no playbooks pending", True)
-                        self._delete_tag("waiting", artifact)
-                else:
-                    self.__print(f"artifact {artifact['id']} is not expired yet", True)
-                if executions > limit:
+                playbook_executed = self._handle_polling_execution(artifact)
+                self.__print(playbook_executed)
+                if playbook_executed:
+                    executions += 1
+                if executions >= limit:
                     break
             self.__print(f"{executions} playbooks executed")
             return action_result.set_status(phantom.APP_SUCCESS, f"{executions} playbooks executed")
