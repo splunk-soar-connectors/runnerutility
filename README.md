@@ -125,7 +125,7 @@ Remove all pending scheduled playbooks on a container
 Type: **generic** <br>
 Read only: **False**
 
-This action is used to remove all pending schedule playbooks for a container. This is generally intended to be used to cancel execution if some exit criteria has been reached and any scheduled playbooks need to be suspended permanently.
+This action is used to remove all pending scheduled playbooks for a container. This is generally intended to be used to cancel execution if some exit criteria has been reached and any scheduled playbooks need to be suspended permanently.
 
 #### Action Parameters
 
@@ -152,7 +152,7 @@ Returns a count of the matching runner artifacts in the current container
 Type: **generic** <br>
 Read only: **True**
 
-This action is used to determine how many times a specific sheculed playbook has been run in the given container. This is generally used to evaluate escape scenarios when using runner to perform loops and retries.
+This action is used to determine how many times a specific scheduled playbook has been run in the given container. This is generally used to evaluate escape scenarios when using runner to perform loops and retries.
 
 #### Action Parameters
 
