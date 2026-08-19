@@ -474,15 +474,16 @@ class RunnerConnector(phantom.BaseConnector):
                 self.__print("Playbook is valid", True)
                 result = self._run_playbook(artifact)
                 self._update_artifact("complete", artifact, result=result)
-                return True
             else:
                 self.__print(f"playbook is invalid: {artifact['cef']['playbook']}")
                 self._update_artifact("invalid playbook", artifact)
             if self._is_playbook_pending(artifact):
                 self.__print("playbooks pending", True)
+                return True
             else:
                 self.__print("no playbooks pending", True)
                 self._delete_tag("waiting", artifact)
+                return True
         else:
             self.__print(f"artifact {artifact['id']} is not expired yet", True)
         return False
