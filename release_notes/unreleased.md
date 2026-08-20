@@ -1,1 +1,3 @@
 **Unreleased**
+* - Added high priority flag to allow scheduled events to skip the line and ensure they execute on schedule instead of queuing
+* - Updated python to 3.13
